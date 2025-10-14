@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Form, Button } from "react-bootstrap";
-import servizioService from "../services/ServizioService";
+import servizioService from "../../services/ServizioService";
 
 function ServizioForm() {
   const [servizio, setServizio] = useState({

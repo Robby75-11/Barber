@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Form, Button } from "react-bootstrap";
-import clienteService from "../services/ClienteService";
+import clienteService from "../../services/ClienteService";
 
 function ClienteForm() {
   const [cliente, setCliente] = useState({

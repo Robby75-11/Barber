@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Form, Button, Container } from "react-bootstrap";
-import ParrucchiereService from "../services/ParrucchiereService";
+import ParrucchiereService from "../../services/ParrucchiereService";
 
 const ParrucchiereForm = () => {
   const [nome, setNome] = useState("");

@@ -1,18 +1,17 @@
 // src/components/PrenotazioniPage.jsx
 import React, { useEffect, useState } from "react";
-import { Table, Button, Spinner, Form } from "react-bootstrap";
+import { Form, Button, Spinner } from "react-bootstrap";
 import dayjs from "dayjs";
 import prenotazioneService from "../services/PrenotazioneService";
 import clienteService from "../services/ClienteService";
 import parrucchiereService from "../services/ParrucchiereService";
 import servizioService from "../services/ServizioService";
+import PrenotazioniTable from "./tables/PrenotazioniTable";
 
-function PrenotazioniPage() {
-  // ✅ Stato lista prenotazioni
+const PrenotazioniPage = () => {
   const [prenotazioni, setPrenotazioni] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Stato form
   const [clienteId, setClienteId] = useState("");
   const [parrucchiereId, setParrucchiereId] = useState("");
   const [servizioId, setServizioId] = useState("");
@@ -22,20 +21,19 @@ function PrenotazioniPage() {
   const [parrucchieri, setParrucchieri] = useState([]);
   const [servizi, setServizi] = useState([]);
 
-  // 🔹 Carica prenotazioni
+  // Carica prenotazioni
   const loadPrenotazioni = async () => {
     try {
       const res = await prenotazioneService.getAllPrenotazioni();
-      console.log("Prenotazioni ricevute:", res.data);
       setPrenotazioni(res.data);
     } catch (err) {
-      console.error("Errore nel caricamento:", err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  // 🔹 Carica dati form (clienti, parrucchieri, servizi)
+  // Carica dati per il form
   const loadFormData = async () => {
     try {
       const [clientiRes, parrRes, servRes] = await Promise.all([
@@ -47,7 +45,7 @@ function PrenotazioniPage() {
       setParrucchieri(parrRes.data);
       setServizi(servRes.data);
     } catch (err) {
-      console.error("Errore caricamento form:", err);
+      console.error(err);
     }
   };
 
@@ -56,7 +54,7 @@ function PrenotazioniPage() {
     loadFormData();
   }, []);
 
-  // 🔹 Elimina prenotazione
+  // Gestione eliminazione prenotazione
   const handleDelete = async (id) => {
     if (!window.confirm("Sei sicuro di voler eliminare questa prenotazione?"))
       return;
@@ -69,7 +67,7 @@ function PrenotazioniPage() {
     }
   };
 
-  // 🔹 Aggiorna stato prenotazione
+  // Aggiornamento stato prenotazione
   const handleStatoChange = async (id, nuovoStato) => {
     try {
       await prenotazioneService.updatePrenotazione(id, { stato: nuovoStato });
@@ -77,12 +75,12 @@ function PrenotazioniPage() {
         prev.map((p) => (p.id === id ? { ...p, stato: nuovoStato } : p))
       );
     } catch (err) {
-      console.error("Errore aggiornamento stato:", err);
+      console.error(err);
       alert("Errore durante l'aggiornamento dello stato");
     }
   };
 
-  // 🔹 Crea nuova prenotazione
+  // Crea nuova prenotazione
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!clienteId || !parrucchiereId || !servizioId || !data) {
@@ -90,7 +88,6 @@ function PrenotazioniPage() {
       return;
     }
     try {
-      // Formatta la data correttamente
       const formattedDate = dayjs(data).format("YYYY-MM-DDTHH:mm:ss");
       await prenotazioneService.createPrenotazione({
         clienteId,
@@ -104,7 +101,7 @@ function PrenotazioniPage() {
       setParrucchiereId("");
       setServizioId("");
       setData("");
-      loadPrenotazioni(); // aggiorna lista
+      loadPrenotazioni();
     } catch (err) {
       console.error(err);
       alert("Errore nella prenotazione");
@@ -115,80 +112,6 @@ function PrenotazioniPage() {
 
   return (
     <div className="mt-4">
-      <h3 className="mb-3">📅 Lista Prenotazioni</h3>
-      <Table striped bordered hover responsive>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Cliente</th>
-            <th>Parrucchiere</th>
-            <th>Servizio</th>
-            <th>Data</th>
-            <th>Azioni</th>
-          </tr>
-        </thead>
-        <tbody>
-          {prenotazioni.map((p) => (
-            <tr key={p.id}>
-              <td>{p.id}</td>
-              <td>
-                {p.cliente ? `${p.cliente.nome} ${p.cliente.cognome}` : "-"}
-              </td>
-              <td>
-                {p.parrucchiere
-                  ? `${p.parrucchiere.nome} ${p.parrucchiere.cognome}`
-                  : "-"}
-              </td>
-              <td>{p.servizio ? p.servizio.nome : "-"}</td>
-              <td>{p.data ? dayjs(p.data).format("DD/MM/YYYY HH:mm") : "-"}</td>
-              <td className="d-flex gap-2 align-items-center">
-                {/* Badge stato */}
-                {p.stato === "IN_ATTESA" && (
-                  <span className="badge bg-warning text-dark">In attesa</span>
-                )}
-                {p.stato === "CONFERMATA" && (
-                  <span className="badge bg-success">Confermata</span>
-                )}
-                {p.stato === "CANCELLATA" && (
-                  <span className="badge bg-danger">Cancellata</span>
-                )}
-
-                {/* Pulsanti rapidi */}
-                {p.stato !== "CONFERMATA" && (
-                  <Button
-                    size="sm"
-                    variant="success"
-                    onClick={() => handleStatoChange(p.id, "CONFERMATA")}
-                  >
-                    ✅
-                  </Button>
-                )}
-                {p.stato !== "CANCELLATA" && (
-                  <Button
-                    size="sm"
-                    variant="danger"
-                    onClick={() => handleStatoChange(p.id, "CANCELLATA")}
-                  >
-                    ❌
-                  </Button>
-                )}
-
-                {/* Elimina */}
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => handleDelete(p.id)}
-                >
-                  🗑
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-
-      <hr />
-
       <h3 className="mb-3">📝 Nuova Prenotazione</h3>
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-2">
@@ -247,8 +170,17 @@ function PrenotazioniPage() {
 
         <Button type="submit">Prenota</Button>
       </Form>
+
+      <hr />
+
+      <h3 className="mb-3">📅 Lista Prenotazioni</h3>
+      <PrenotazioniTable
+        prenotazioni={prenotazioni}
+        handleDelete={handleDelete}
+        handleStatoChange={handleStatoChange}
+      />
     </div>
   );
-}
+};
 
 export default PrenotazioniPage;

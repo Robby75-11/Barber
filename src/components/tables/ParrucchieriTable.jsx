@@ -28,7 +28,7 @@ const ParrucchieriTable = () => {
   }, []);
 
   return (
-    <Table striped bordered hover>
+    <Table striped bordered hover responsive className="w-100">
       <thead>
         <tr>
           <th>Nome</th>

@@ -6,10 +6,6 @@ import {
   Link,
   Navigate,
 } from "react-router-dom";
-import ParrucchiereForm from "./components/ParrucchiereForm";
-import ClienteForm from "./components/ClienteForm";
-import PrenotazioniPage from "./components/PrenotazioniPage";
-import ServizioForm from "./components/ServizioForm";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Login from "./components/Login";
 import Register from "./components/Register";
@@ -41,27 +37,15 @@ function App() {
             💇‍♂️ Martino Parrucchieri
           </Navbar.Brand>
           <Nav className="me-auto">
+            <Nav.Link as={Link} to="/">
+              Home
+            </Nav.Link>
             {isAdmin && (
               <Nav.Link as={Link} to="/admin">
                 Dashboard Admin
               </Nav.Link>
             )}
-            <Nav.Link as={Link} to="/parrucchieri">
-              Parrucchieri
-            </Nav.Link>
-            <Nav.Link as={Link} to="/">
-              Home
-            </Nav.Link>
 
-            <Nav.Link as={Link} to="/clienti">
-              Clienti
-            </Nav.Link>
-            <Nav.Link as={Link} to="/prenotazioni">
-              Prenotazioni
-            </Nav.Link>
-            <Nav.Link as={Link} to="/servizi">
-              Servizi
-            </Nav.Link>
             {!user ? (
               <>
                 <Nav.Link as={Link} to="/login">
@@ -83,14 +67,9 @@ function App() {
 
       <Container className="mt-4">
         <Routes>
-          <Route path="/parrucchieri" element={<ParrucchiereForm />} />
-          <Route path="/clienti" element={<ClienteForm />} />
-          <Route path="/servizi" element={<ServizioForm />} />
-          <Route path="/prenotazioni" element={<PrenotazioniPage />} />
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<Login setUser={setUser} />} />
           <Route path="/register" element={<Register setUser={setUser} />} />
-          <Route path="/" element={<h2>Benvenuto nel gestionale 💈</h2>} />
 
           {/* Dashboard Admin protetta */}
           <Route
