@@ -2,17 +2,17 @@ import React, { useState } from "react";
 import { Form, Button } from "react-bootstrap";
 import authService from "../services/authService";
 
-function Login({ setUser }) {
-  const [username, setUsername] = useState("");
+function Login({ setUtente }) {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await authService.login({ email: username, password });
+      const res = await authService.login({ email, password });
       localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.cliente));
-      setUser(res.data.cliente);
+      localStorage.setItem("user", JSON.stringify(res.data.utente));
+      setUtente(res.data.utente);
       alert("✅ Login effettuato!");
     } catch (err) {
       console.error(err);
@@ -25,8 +25,8 @@ function Login({ setUser }) {
       <Form.Control
         type="text"
         placeholder="Email"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
       />
       <Form.Control
         type="password"

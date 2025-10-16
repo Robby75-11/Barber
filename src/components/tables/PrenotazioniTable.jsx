@@ -5,15 +5,16 @@ import dayjs from "dayjs";
 
 const PrenotazioniTable = ({
   prenotazioni,
-  handleDelete,
-  handleStatoChange,
+  onDelete,
+  onStatoChange,
+  isAdmin,
 }) => {
   return (
     <Table striped bordered hover responsive>
       <thead>
         <tr>
           <th>ID</th>
-          <th>Cliente</th>
+          {isAdmin && <th>Utente</th>}
           <th>Parrucchiere</th>
           <th>Servizio</th>
           <th>Data</th>
@@ -24,9 +25,9 @@ const PrenotazioniTable = ({
         {prenotazioni.map((p) => (
           <tr key={p.id}>
             <td>{p.id}</td>
-            <td>
-              {p.cliente ? `${p.cliente.nome} ${p.cliente.cognome}` : "-"}
-            </td>
+            {isAdmin && (
+              <td>{p.utente ? `${p.utente.nome} ${p.utente.cognome}` : "-"}</td>
+            )}
             <td>{p.parrucchiere ? p.parrucchiere.nome : "-"}</td>
             <td>{p.servizio ? p.servizio.nome : "-"}</td>
             <td>{p.data ? dayjs(p.data).format("DD/MM/YYYY HH:mm") : "-"}</td>
@@ -45,7 +46,7 @@ const PrenotazioniTable = ({
                 <Button
                   size="sm"
                   variant="success"
-                  onClick={() => handleStatoChange(p.id, "CONFERMATA")}
+                  onClick={() => onStatoChange(p.id, "CONFERMATA")}
                 >
                   ✅
                 </Button>
@@ -54,7 +55,7 @@ const PrenotazioniTable = ({
                 <Button
                   size="sm"
                   variant="danger"
-                  onClick={() => handleStatoChange(p.id, "CANCELLATA")}
+                  onClick={() => onStatoChange(p.id, "CANCELLATA")}
                 >
                   ❌
                 </Button>
@@ -62,7 +63,7 @@ const PrenotazioniTable = ({
               <Button
                 size="sm"
                 variant="secondary"
-                onClick={() => handleDelete(p.id)}
+                onClick={() => onDelete(p.id)}
               >
                 🗑
               </Button>

@@ -1,4 +1,6 @@
-import React from "react";
+import ServiziTable from "./tables/ServiziTable";
+import ParrucchieriTable from "./tables/ParrucchieriTable";
+import PrenotazioniPage from "./PrenotazioniPage";
 import { Container, Row, Col, Image, Card } from "react-bootstrap";
 
 const images = [
@@ -13,10 +15,36 @@ const images = [
   "/sala 2.jpeg",
 ];
 
-const HomePage = () => {
+const HomePage = ({ utente }) => {
   return (
     <Container className="mt-4">
-      <h2 className="mb-4 text-center">I nostri lavori 💇‍♂️</h2>
+      <h2 className="mb-4 text-center">Benvenuto 💇‍♂️ {utente?.nome}</h2>
+
+      {/* Sezione visibile solo agli utenti loggati */}
+      {utente?.role === "UTENTE" && (
+        <>
+          <Row className="mb-4">
+            <Col>
+              <h4>Servizi disponibili</h4>
+              <ServiziTable />
+            </Col>
+          </Row>
+
+          <Row className="mb-4">
+            <Col>
+              <h4>I nostri parrucchieri</h4>
+              <ParrucchieriTable />
+            </Col>
+          </Row>
+
+          <Row className="mb-4">
+            <Col>
+              <h4>Prenotazioni</h4>
+              <PrenotazioniPage utente={utente} />
+            </Col>
+          </Row>
+        </>
+      )}
 
       {/* Griglia immagini */}
       <Row>

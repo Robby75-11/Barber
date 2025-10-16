@@ -1,4 +1,3 @@
-// src/components/dashboard/AdminDashboard.jsx
 import { useState, useEffect } from "react";
 import {
   Tabs,
@@ -13,85 +12,109 @@ import {
 import dayjs from "dayjs";
 
 // Tabelle
-import ClientiTable from "../tables/ClientiTable";
+import UtentiTable from "../tables/UtentiTable";
 import ParrucchieriTable from "../tables/ParrucchieriTable";
 import ServiziTable from "../tables/ServiziTable";
 
 // Form
-import ClienteForm from "../forms/ClienteForm";
-import ParrucchiereForm from "../forms/ParrucchiereForm";
-import ServizioForm from "../forms/ServizioForm";
+import UtenteForm from "../forms/UtenteForm";
 
 // Services
 import prenotazioneService from "../../services/PrenotazioneService";
-import clienteService from "../../services/ClienteService";
+import utenteService from "../../services/UtenteService";
 import parrucchiereService from "../../services/ParrucchiereService";
 import servizioService from "../../services/ServizioService";
 
-const AdminDashboard = () => {
-  const [key, setKey] = useState("clienti");
+const Dashboard = () => {
+  const [key, setKey] = useState("prenotazioni");
+  const [role, setRole] = useState("");
+  const [currentUserId, setCurrentUserId] = useState(null);
 
-  // Stato Prenotazioni
   const [prenotazioni, setPrenotazioni] = useState([]);
-  const [clienteId, setClienteId] = useState("");
+  const [utenteId, setUtenteId] = useState("");
   const [parrucchiereId, setParrucchiereId] = useState("");
   const [servizioId, setServizioId] = useState("");
   const [data, setData] = useState("");
-  const [clienti, setClienti] = useState([]);
+
+  const [utenti, setUtenti] = useState([]);
   const [parrucchieri, setParrucchieri] = useState([]);
   const [servizi, setServizi] = useState([]);
 
+  // 🔹 Caricamento dati all'avvio
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [prenRes, cRes, pRes, sRes] = await Promise.all([
+        const userRes = JSON.parse(localStorage.getItem("utente"));
+        if (!userRes) return;
+
+        setRole(userRes.role);
+        setCurrentUserId(userRes.id);
+
+        const [prenRes, uRes, pRes, sRes] = await Promise.all([
           prenotazioneService.getAllPrenotazioni(),
-          clienteService.getClienti(),
+          utenteService.getUtenti(),
           parrucchiereService.getAllParrucchieri(),
           servizioService.getAllServizi(),
         ]);
-        setPrenotazioni(prenRes.data);
-        setClienti(cRes.data);
+
+        // Se è un utente, mostra solo le proprie prenotazioni
+        setPrenotazioni(
+          userRes.role === "UTENTE"
+            ? prenRes.data.filter((p) => p.utente.id === userRes.id)
+            : prenRes.data
+        );
+
+        setUtenti(uRes.data);
         setParrucchieri(pRes.data);
         setServizi(sRes.data);
       } catch (err) {
-        console.error(err);
+        console.error("Errore nel caricamento dati:", err);
       }
     };
     loadData();
   }, []);
 
+  // 🔹 Creazione prenotazione
   const handleSubmitPrenotazione = async (e) => {
     e.preventDefault();
-    if (!clienteId || !parrucchiereId || !servizioId || !data) {
+    if (!parrucchiereId || !servizioId || !data) {
       alert("Compila tutti i campi!");
       return;
     }
+
     try {
       const formattedDate = dayjs(data).format("YYYY-MM-DDTHH:mm:ss");
       await prenotazioneService.createPrenotazione({
-        clienteId,
+        utenteId: role === "AMMINISTRATORE" ? utenteId : currentUserId,
         parrucchiereId,
         servizioId,
         data: formattedDate,
         stato: "IN_ATTESA",
       });
-      alert("Prenotazione creata!");
-      setClienteId("");
+
+      alert("✅ Prenotazione creata!");
+
+      setUtenteId("");
       setParrucchiereId("");
       setServizioId("");
       setData("");
+
+      // Ricarica le prenotazioni
       const res = await prenotazioneService.getAllPrenotazioni();
-      setPrenotazioni(res.data);
+      setPrenotazioni(
+        role === "UTENTE"
+          ? res.data.filter((p) => p.utente.id === currentUserId)
+          : res.data
+      );
     } catch (err) {
       console.error(err);
-      alert("Errore nella prenotazione");
+      alert("❌ Errore nella prenotazione");
     }
   };
 
+  // 🔹 Eliminazione prenotazione
   const handleDeletePrenotazione = async (id) => {
-    if (!window.confirm("Sei sicuro di voler eliminare questa prenotazione?"))
-      return;
+    if (!window.confirm("Vuoi eliminare questa prenotazione?")) return;
     try {
       await prenotazioneService.deletePrenotazione(id);
       setPrenotazioni(prenotazioni.filter((p) => p.id !== id));
@@ -103,82 +126,72 @@ const AdminDashboard = () => {
 
   return (
     <Container fluid className="mt-4">
-      <h2 className="mb-4">Dashboard Admin</h2>
+      <h2 className="mb-4">Benvenuto nella tua Dashboard</h2>
+
       <Tabs
         activeKey={key}
         onSelect={(k) => setKey(k)}
         className="mb-3"
         justify
-        variant="tabs"
       >
-        {/* ---------------- CLIENTI ---------------- */}
-        <Tab eventKey="clienti" title="Clienti">
-          <Row>
-            <Col xs={12} lg={6} className="mb-3">
-              <h4>Nuovo Cliente</h4>
-              <ClienteForm />
-            </Col>
-            <Col xs={12} lg={6}>
-              <h4>Lista Clienti</h4>
-              <div className="table-responsive">
-                <ClientiTable />
-              </div>
-            </Col>
-          </Row>
-        </Tab>
+        {/* 👑 Solo admin vede tab Utenti */}
+        {role === "AMMINISTRATORE" && (
+          <Tab eventKey="utenti" title="Utenti">
+            <Row>
+              <Col xs={12} lg={6} className="mb-3">
+                <h4>Nuovo Utente</h4>
+                <UtenteForm />
+              </Col>
+              <Col xs={12} lg={6}>
+                <h4>Lista Utenti</h4>
+                <div className="table-responsive">
+                  <UtentiTable />
+                </div>
+              </Col>
+            </Row>
+          </Tab>
+        )}
 
-        {/* ---------------- PARRUCCHIERI ---------------- */}
+        {/* 💇‍♀️ Parrucchieri (visibile a tutti) */}
         <Tab eventKey="parrucchieri" title="Parrucchieri">
           <Row>
-            <Col xs={12} lg={6} className="mb-3">
-              <h4>Nuovo Parrucchiere</h4>
-              <ParrucchiereForm />
-            </Col>
-            <Col xs={12} lg={6}>
-              <h4>Lista Parrucchieri</h4>
-              <div className="table-responsive">
-                <ParrucchieriTable />
-              </div>
+            <Col xs={12}>
+              <ParrucchieriTable parrucchieri={parrucchieri} />
             </Col>
           </Row>
         </Tab>
 
-        {/* ---------------- SERVIZI ---------------- */}
+        {/* ✂️ Servizi (visibile a tutti) */}
         <Tab eventKey="servizi" title="Servizi">
           <Row>
-            <Col xs={12} lg={6} className="mb-3">
-              <h4>Nuovo Servizio</h4>
-              <ServizioForm />
-            </Col>
-            <Col xs={12} lg={6}>
-              <h4>Lista Servizi</h4>
-              <div className="table-responsive">
-                <ServiziTable />
-              </div>
+            <Col xs={12}>
+              <ServiziTable servizi={servizi} />
             </Col>
           </Row>
         </Tab>
 
-        {/* ---------------- PRENOTAZIONI ---------------- */}
+        {/* 📅 Prenotazioni (visibile a tutti, ma con restrizioni diverse) */}
         <Tab eventKey="prenotazioni" title="Prenotazioni">
           <Row>
             <Col xs={12} lg={4} className="mb-3">
               <h4>Nuova Prenotazione</h4>
               <Form onSubmit={handleSubmitPrenotazione}>
-                <Form.Group className="mb-2">
-                  <Form.Label>Cliente</Form.Label>
-                  <Form.Select
-                    value={clienteId}
-                    onChange={(e) => setClienteId(e.target.value)}
-                  >
-                    <option value="">Seleziona cliente</option>
-                    {clienti.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.nome} {c.cognome}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
+                {role === "AMMINISTRATORE" && (
+                  <Form.Group className="mb-2">
+                    <Form.Label>Utente</Form.Label>
+                    <Form.Select
+                      value={utenteId}
+                      onChange={(e) => setUtenteId(e.target.value)}
+                    >
+                      <option value="">Seleziona utente</option>
+                      {utenti.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.nome} {u.cognome}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+                )}
 
                 <Form.Group className="mb-2">
                   <Form.Label>Parrucchiere</Form.Label>
@@ -219,45 +232,49 @@ const AdminDashboard = () => {
                   />
                 </Form.Group>
 
-                <Button type="submit">Prenota</Button>
+                <Button type="submit" className="w-100 mt-2">
+                  Prenota
+                </Button>
               </Form>
             </Col>
 
             <Col xs={12} lg={8}>
-              <h4>Lista Prenotazioni</h4>
+              <h4>Le tue Prenotazioni</h4>
               <div className="table-responsive">
-                <Table striped bordered hover responsive className="w-100">
+                <Table striped bordered hover responsive>
                   <thead>
                     <tr>
-                      <th>Cliente</th>
+                      <th>Utente</th>
                       <th>Parrucchiere</th>
                       <th>Servizio</th>
                       <th>Data</th>
-                      <th>Azioni</th>
+                      {role === "AMMINISTRATORE" && <th>Azioni</th>}
                     </tr>
                   </thead>
                   <tbody>
                     {prenotazioni.map((p) => (
                       <tr key={p.id}>
                         <td>
-                          {p.cliente.nome} {p.cliente.cognome}
+                          {p.utente?.nome} {p.utente?.cognome}
                         </td>
-                        <td>{p.parrucchiere.nome}</td>
-                        <td>{p.servizio.nome}</td>
+                        <td>{p.parrucchiere?.nome}</td>
+                        <td>{p.servizio?.nome}</td>
                         <td>
                           {p.data
                             ? dayjs(p.data).format("DD/MM/YYYY HH:mm")
                             : "N/D"}
                         </td>
-                        <td>
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={() => handleDeletePrenotazione(p.id)}
-                          >
-                            Elimina
-                          </Button>
-                        </td>
+                        {role === "AMMINISTRATORE" && (
+                          <td>
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              onClick={() => handleDeletePrenotazione(p.id)}
+                            >
+                              Elimina
+                            </Button>
+                          </td>
+                        )}
                       </tr>
                     ))}
                   </tbody>
@@ -271,4 +288,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard;
+export default Dashboard;

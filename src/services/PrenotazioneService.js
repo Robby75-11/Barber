@@ -8,7 +8,9 @@ const getAllPrenotazioni = () => axios.get(API_URL, config());
 // Crea nuova prenotazione
 const createPrenotazione = (prenotazione) =>
   axios.post(API_URL, prenotazione, config());
+
 const deletePrenotazione = (id) => axios.delete(`${API_URL}/${id}`, config());
+
 const updatePrenotazione = (id, dto) =>
   axios.put(`${API_URL}/${id}`, dto, config());
 

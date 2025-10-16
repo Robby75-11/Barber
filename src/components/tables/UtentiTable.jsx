@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { Table, Button } from "react-bootstrap";
-import clienteService from "../../services/ClienteService";
+import utenteService from "../../services/UtenteService";
 
-const ClientiTable = () => {
-  const [clienti, setClienti] = useState([]);
+const UtentiTable = () => {
+  const [utenti, setUtenti] = useState([]);
 
-  const fetchClienti = async () => {
+  const fetchUtenti = async () => {
     try {
-      const res = await clienteService.getClienti();
-      setClienti(res.data);
+      const res = await utenteService.getUtenti();
+      setUtenti(res.data);
     } catch (err) {
       console.error(err);
     }
@@ -16,40 +16,42 @@ const ClientiTable = () => {
 
   const handleDelete = async (id) => {
     try {
-      await clienteService.deleteCliente(id);
-      fetchClienti();
+      await utenteService.deleteUtente(id);
+      fetchUtenti();
     } catch (err) {
       console.error(err);
     }
   };
 
   useEffect(() => {
-    fetchClienti();
+    fetchUtenti();
   }, []);
 
   return (
-    <Table striped bordered hover responsive className="w-100">
+    <Table striped bordered hover responsive>
       <thead>
         <tr>
           <th>Nome</th>
           <th>Cognome</th>
           <th>Email</th>
           <th>Telefono</th>
+          <th>Ruolo</th>
           <th>Azioni</th>
         </tr>
       </thead>
       <tbody>
-        {clienti.map((c) => (
-          <tr key={c.id}>
-            <td>{c.nome}</td>
-            <td>{c.cognome}</td>
-            <td>{c.email}</td>
-            <td>{c.telefono}</td>
+        {utenti.map((u) => (
+          <tr key={u.id}>
+            <td>{u.nome}</td>
+            <td>{u.cognome}</td>
+            <td>{u.email}</td>
+            <td>{u.telefono}</td>
+            <td>{u.role}</td>
             <td>
               <Button
                 variant="danger"
                 size="sm"
-                onClick={() => handleDelete(c.id)}
+                onClick={() => handleDelete(u.id)}
               >
                 Elimina
               </Button>
@@ -61,4 +63,4 @@ const ClientiTable = () => {
   );
 };
 
-export default ClientiTable;
+export default UtentiTable;

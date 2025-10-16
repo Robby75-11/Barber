@@ -1,28 +1,39 @@
 import React, { useState } from "react";
 import { Form, Button } from "react-bootstrap";
-import clienteService from "../../services/ClienteService";
+import utenteService from "../../services/UtenteService";
 
-function ClienteForm() {
-  const [cliente, setCliente] = useState({
+function UtenteForm() {
+  const [utente, setUtente] = useState({
     nome: "",
     cognome: "",
     email: "",
     telefono: "",
+    username: "",
+    password: "",
+    role: "UTENTE",
   });
 
   const handleChange = (e) => {
-    setCliente({ ...cliente, [e.target.name]: e.target.value });
+    setUtente({ ...utente, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await clienteService.createCliente(cliente);
-      alert("✅ Cliente creato con successo!");
-      setCliente({ nome: "", cognome: "", email: "", telefono: "" });
+      await utenteService.createUtente(utente);
+      alert("✅ Utente creato con successo!");
+      setUtente({
+        nome: "",
+        cognome: "",
+        email: "",
+        telefono: "",
+        username: "",
+        password: "",
+        role: "UTENTE",
+      });
     } catch (err) {
       console.error(err);
-      alert("❌ Errore nella creazione del cliente");
+      alert("❌ Errore nella creazione dell'utente");
     }
   };
 
@@ -33,7 +44,7 @@ function ClienteForm() {
         <Form.Control
           type="text"
           name="nome"
-          value={cliente.nome}
+          value={utente.nome}
           onChange={handleChange}
           required
         />
@@ -44,7 +55,7 @@ function ClienteForm() {
         <Form.Control
           type="text"
           name="cognome"
-          value={cliente.cognome}
+          value={utente.cognome}
           onChange={handleChange}
           required
         />
@@ -55,7 +66,7 @@ function ClienteForm() {
         <Form.Control
           type="email"
           name="email"
-          value={cliente.email}
+          value={utente.email}
           onChange={handleChange}
         />
       </Form.Group>
@@ -65,14 +76,34 @@ function ClienteForm() {
         <Form.Control
           type="text"
           name="telefono"
-          value={cliente.telefono}
+          value={utente.telefono}
           onChange={handleChange}
         />
       </Form.Group>
 
-      <Button type="submit">Crea Cliente</Button>
+      <Form.Group className="mb-2">
+        <Form.Label>Username</Form.Label>
+        <Form.Control
+          type="text"
+          name="username"
+          value={utente.username}
+          onChange={handleChange}
+        />
+      </Form.Group>
+
+      <Form.Group className="mb-2">
+        <Form.Label>Password</Form.Label>
+        <Form.Control
+          type="password"
+          name="password"
+          value={utente.password}
+          onChange={handleChange}
+        />
+      </Form.Group>
+
+      <Button type="submit">Crea Utente</Button>
     </Form>
   );
 }
 
-export default ClienteForm;
+export default UtenteForm;

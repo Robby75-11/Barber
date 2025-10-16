@@ -3,29 +3,36 @@ import React, { useEffect, useState } from "react";
 import { Form, Button, Spinner } from "react-bootstrap";
 import dayjs from "dayjs";
 import prenotazioneService from "../services/PrenotazioneService";
-import clienteService from "../services/ClienteService";
+import utenteService from "../services/UtenteService";
 import parrucchiereService from "../services/ParrucchiereService";
 import servizioService from "../services/ServizioService";
 import PrenotazioniTable from "./tables/PrenotazioniTable";
 
-const PrenotazioniPage = () => {
+const PrenotazioniPage = ({ utente }) => {
   const [prenotazioni, setPrenotazioni] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [clienteId, setClienteId] = useState("");
+  const [utenteId, setUtenteId] = useState("");
   const [parrucchiereId, setParrucchiereId] = useState("");
   const [servizioId, setServizioId] = useState("");
   const [data, setData] = useState("");
 
-  const [clienti, setClienti] = useState([]);
+  const [utenti, setUtenti] = useState([]);
   const [parrucchieri, setParrucchieri] = useState([]);
   const [servizi, setServizi] = useState([]);
 
+  const isAdmin = utente?.role === "AMMINISTRATORE";
+
   // Carica prenotazioni
   const loadPrenotazioni = async () => {
+    setLoading(true);
     try {
       const res = await prenotazioneService.getAllPrenotazioni();
-      setPrenotazioni(res.data);
+      if (isAdmin) {
+        setPrenotazioni(res.data); // admin vede tutte
+      } else {
+        setPrenotazioni(res.data.filter((p) => p.utente.id === utente.id)); // utente vede solo le proprie
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -33,15 +40,15 @@ const PrenotazioniPage = () => {
     }
   };
 
-  // Carica dati per il form
+  // Carica dati per form (utenti solo per admin)
   const loadFormData = async () => {
     try {
-      const [clientiRes, parrRes, servRes] = await Promise.all([
-        clienteService.getClienti(),
+      const [utRes, parrRes, servRes] = await Promise.all([
+        isAdmin ? utenteService.getUtenti() : Promise.resolve({ data: [] }),
         parrucchiereService.getAllParrucchieri(),
         servizioService.getAllServizi(),
       ]);
-      setClienti(clientiRes.data);
+      setUtenti(utRes.data);
       setParrucchieri(parrRes.data);
       setServizi(servRes.data);
     } catch (err) {
@@ -54,7 +61,6 @@ const PrenotazioniPage = () => {
     loadFormData();
   }, []);
 
-  // Gestione eliminazione prenotazione
   const handleDelete = async (id) => {
     if (!window.confirm("Sei sicuro di voler eliminare questa prenotazione?"))
       return;
@@ -67,37 +73,33 @@ const PrenotazioniPage = () => {
     }
   };
 
-  // Aggiornamento stato prenotazione
   const handleStatoChange = async (id, nuovoStato) => {
     try {
       await prenotazioneService.updatePrenotazione(id, { stato: nuovoStato });
-      setPrenotazioni((prev) =>
-        prev.map((p) => (p.id === id ? { ...p, stato: nuovoStato } : p))
-      );
+      loadPrenotazioni();
     } catch (err) {
       console.error(err);
-      alert("Errore durante l'aggiornamento dello stato");
+      alert("Errore nell'aggiornamento dello stato");
     }
   };
 
-  // Crea nuova prenotazione
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!clienteId || !parrucchiereId || !servizioId || !data) {
+    if (!parrucchiereId || !servizioId || !data || (isAdmin && !utenteId)) {
       alert("Compila tutti i campi!");
       return;
     }
     try {
       const formattedDate = dayjs(data).format("YYYY-MM-DDTHH:mm:ss");
       await prenotazioneService.createPrenotazione({
-        clienteId,
+        utenteId: isAdmin ? utenteId : utente.id,
         parrucchiereId,
         servizioId,
         data: formattedDate,
         stato: "IN_ATTESA",
       });
       alert("Prenotazione creata!");
-      setClienteId("");
+      setUtenteId("");
       setParrucchiereId("");
       setServizioId("");
       setData("");
@@ -114,20 +116,22 @@ const PrenotazioniPage = () => {
     <div className="mt-4">
       <h3 className="mb-3">📝 Nuova Prenotazione</h3>
       <Form onSubmit={handleSubmit}>
-        <Form.Group className="mb-2">
-          <Form.Label>Cliente</Form.Label>
-          <Form.Select
-            value={clienteId}
-            onChange={(e) => setClienteId(e.target.value)}
-          >
-            <option value="">Seleziona cliente</option>
-            {clienti.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.nome} {c.cognome}
-              </option>
-            ))}
-          </Form.Select>
-        </Form.Group>
+        {isAdmin && (
+          <Form.Group className="mb-2">
+            <Form.Label>Utente</Form.Label>
+            <Form.Select
+              value={utenteId}
+              onChange={(e) => setUtenteId(e.target.value)}
+            >
+              <option value="">Seleziona utente</option>
+              {utenti.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.nome} {u.cognome}
+                </option>
+              ))}
+            </Form.Select>
+          </Form.Group>
+        )}
 
         <Form.Group className="mb-2">
           <Form.Label>Parrucchiere</Form.Label>
@@ -173,11 +177,12 @@ const PrenotazioniPage = () => {
 
       <hr />
 
-      <h3 className="mb-3">📅 Lista Prenotazioni</h3>
+      <h3 className="mb-3">📋 Le tue prenotazioni</h3>
       <PrenotazioniTable
         prenotazioni={prenotazioni}
-        handleDelete={handleDelete}
-        handleStatoChange={handleStatoChange}
+        onDelete={handleDelete}
+        onStatoChange={handleStatoChange}
+        isAdmin={isAdmin}
       />
     </div>
   );

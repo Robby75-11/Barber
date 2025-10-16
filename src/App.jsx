@@ -10,24 +10,24 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import { useState, useEffect } from "react";
-import AdminDashboard from "./components/dashboard/AdminDashboard";
+import Dashboard from "./components/dashboard/Dashboard";
 import HomePage from "./components/HomePage";
 
 function App() {
-  const [user, setUser] = useState(null);
+  const [utente, setUtente] = useState(null);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) setUser(JSON.parse(savedUser));
+    const savedUtente = localStorage.getItem("utente");
+    if (savedUtente) setUtente(JSON.parse(savedUtente));
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setUser(null);
+    localStorage.removeItem("utente");
+    setUtente(null);
   };
 
-  const isAdmin = user?.role === "AMMINISTRATORE";
+  const isAdmin = utente?.role === "AMMINISTRATORE";
 
   return (
     <Router>
@@ -46,7 +46,7 @@ function App() {
               </Nav.Link>
             )}
 
-            {!user ? (
+            {!utente ? (
               <>
                 <Nav.Link as={Link} to="/login">
                   Login
@@ -57,7 +57,7 @@ function App() {
               </>
             ) : (
               <>
-                <Nav.Link disabled>Ciao, {user.username}</Nav.Link>
+                <Nav.Link disabled>Ciao, {utente.username}</Nav.Link>
                 <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
               </>
             )}
@@ -67,16 +67,17 @@ function App() {
 
       <Container className="mt-4">
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<Login setUser={setUser} />} />
-          <Route path="/register" element={<Register setUser={setUser} />} />
+          <Route path="/" element={<HomePage utente={utente} />} />
+          <Route path="/login" element={<Login setUtente={setUtente} />} />
+          <Route
+            path="/register"
+            element={<Register setUtente={setUtente} />}
+          />
 
           {/* Dashboard Admin protetta */}
           <Route
             path="/admin/*"
-            element={
-              isAdmin ? <AdminDashboard /> : <Navigate to="/login" replace />
-            }
+            element={isAdmin ? <Dashboard /> : <Navigate to="/login" replace />}
           />
 
           {/* Fallback 404 */}
