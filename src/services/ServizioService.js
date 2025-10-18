@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8080/servizi";
+const API_URL = import.meta.env.VITE_API_URL + "/servizi";
 
 const getToken = () => localStorage.getItem("token"); // assicurati di salvare il token al login
 

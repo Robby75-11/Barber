@@ -1,5 +1,5 @@
 import axios from "axios";
-const API_URL = "http://localhost:8080/prenotazioni";
+const API_URL = import.meta.env.VITE_API_URL + "/prenotazioni";
 
 const getToken = () => localStorage.getItem("token");
 const config = () => ({ headers: { Authorization: `Bearer ${getToken()}` } });
