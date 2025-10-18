@@ -1,38 +1,16 @@
-import { useEffect, useState } from "react";
 import { Table, Button } from "react-bootstrap";
-import parrucchiereService from "../../services/ParrucchiereService";
 
-const ParrucchieriTable = () => {
-  const [parrucchieri, setParrucchieri] = useState([]);
-
-  const fetchParrucchieri = async () => {
-    try {
-      const res = await parrucchiereService.getAllParrucchieri();
-      setParrucchieri(res.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      await parrucchiereService.deleteParrucchiere(id);
-      fetchParrucchieri();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  useEffect(() => {
-    fetchParrucchieri();
-  }, []);
+const ParrucchieriTable = ({ parrucchieri, onDelete }) => {
+  if (!parrucchieri || parrucchieri.length === 0)
+    return <p className="mt-3">Nessun parrucchiere trovato.</p>;
 
   return (
-    <Table striped bordered hover responsive className="w-100">
+    <Table striped bordered hover responsive>
       <thead>
         <tr>
           <th>Nome</th>
-          <th>Specialita</th>
+          <th>Specialità</th>
+          <th>Azioni</th>
         </tr>
       </thead>
       <tbody>
@@ -42,9 +20,12 @@ const ParrucchieriTable = () => {
             <td>{p.specialita}</td>
             <td>
               <Button
-                variant="danger"
                 size="sm"
-                onClick={() => handleDelete(p.id)}
+                variant="danger"
+                onClick={() =>
+                  window.confirm("Eliminare questo parrucchiere?") &&
+                  onDelete(p.id)
+                }
               >
                 Elimina
               </Button>

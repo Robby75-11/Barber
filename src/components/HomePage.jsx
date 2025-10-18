@@ -1,7 +1,13 @@
+import { useEffect, useState } from "react";
+import { Container, Row, Col, Image, Card } from "react-bootstrap";
 import ServiziTable from "./tables/ServiziTable";
 import ParrucchieriTable from "./tables/ParrucchieriTable";
+import UtentiTable from "./tables/UtentiTable";
 import PrenotazioniPage from "./PrenotazioniPage";
-import { Container, Row, Col, Image, Card } from "react-bootstrap";
+import ServizioService from "../services/ServizioService";
+import ParrucchiereService from "../services/ParrucchiereService";
+import ParrucchieriList from "./ParrucchieriList";
+import ServiziList from "./ServiziList";
 
 const images = [
   "/barber.jpeg",
@@ -16,30 +22,96 @@ const images = [
 ];
 
 const HomePage = ({ utente }) => {
+  const [servizi, setServizi] = useState([]);
+  const [parrucchieri, setParrucchieri] = useState([]);
+
+  // 🔹 Fetch dati per admin
+  useEffect(() => {
+    if (utente?.role === "AMMINISTRATORE") {
+      ServizioService.getAllServizi()
+        .then((res) => setServizi(res.data))
+        .catch((err) => console.error(err));
+
+      ParrucchiereService.getAllParrucchieri()
+        .then((res) => setParrucchieri(res.data))
+        .catch((err) => console.error(err));
+    }
+  }, [utente]);
+
+  // 🔹 Funzioni elimina
+  const handleDeleteServizio = (id) => {
+    ServizioService.deleteServizio(id)
+      .then(() => setServizi(servizi.filter((s) => s.id !== id)))
+      .catch((err) => console.error(err));
+  };
+
+  const handleDeleteParrucchiere = (id) => {
+    ParrucchiereService.deleteParrucchiere(id)
+      .then(() => setParrucchieri(parrucchieri.filter((p) => p.id !== id)))
+      .catch((err) => console.error(err));
+  };
+
   return (
     <Container className="mt-4">
-      <h2 className="mb-4 text-center">Benvenuto 💇‍♂️ {utente?.nome}</h2>
-
-      {/* Sezione visibile solo agli utenti loggati */}
+      <h2 className="mb-4 text-center">
+        Benvenuto 💇‍♂️ {utente?.nome || utente?.username}
+      </h2>
+      {/* UTENTE NORMALE */}
       {utente?.role === "UTENTE" && (
         <>
           <Row className="mb-4">
             <Col>
               <h4>Servizi disponibili</h4>
-              <ServiziTable />
+              <ServiziList servizi={servizi} />
             </Col>
           </Row>
 
           <Row className="mb-4">
             <Col>
               <h4>I nostri parrucchieri</h4>
-              <ParrucchieriTable />
+              <ParrucchieriList parrucchieri={parrucchieri} />
             </Col>
           </Row>
 
           <Row className="mb-4">
             <Col>
-              <h4>Prenotazioni</h4>
+              <h4>Le tue prenotazioni</h4>
+              <PrenotazioniPage utente={utente} />
+            </Col>
+          </Row>
+        </>
+      )}
+
+      {/* Sezione amministratore */}
+      {utente?.role === "AMMINISTRATORE" && (
+        <>
+          <Row className="mb-4">
+            <Col>
+              <h4>Gestione Clienti</h4>
+              <UtentiTable />
+            </Col>
+          </Row>
+
+          <Row className="mb-4">
+            <Col>
+              <h4>Gestione Servizi</h4>
+              <ServiziTable servizi={servizi} onDelete={handleDeleteServizio} />
+            </Col>
+          </Row>
+
+          <Row className="mb-4">
+            <Col>
+              <h4>Gestione Parrucchieri</h4>
+              <ParrucchieriTable
+                parrucchieri={parrucchieri}
+                onDelete={handleDeleteParrucchiere}
+              />
+            </Col>
+          </Row>
+
+          <Row className="mb-4">
+            <Col>
+              <h4>Gestione Prenotazioni</h4>
               <PrenotazioniPage utente={utente} />
             </Col>
           </Row>

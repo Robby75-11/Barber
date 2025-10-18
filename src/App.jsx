@@ -1,16 +1,9 @@
 import { Container, Nav, Navbar } from "react-bootstrap";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Link,
-  Navigate,
-} from "react-router-dom";
+import { Routes, Route, Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { useState, useEffect } from "react";
 import Login from "./components/Login";
 import Register from "./components/Register";
-import { useState, useEffect } from "react";
-import Dashboard from "./components/dashboard/Dashboard";
 import HomePage from "./components/HomePage";
 
 function App() {
@@ -27,11 +20,9 @@ function App() {
     setUtente(null);
   };
 
-  const isAdmin = utente?.role === "AMMINISTRATORE";
-
   return (
-    <Router>
-      <Navbar bg="dark" variant="dark" expand="lg">
+    <>
+      <Navbar bg="secondary" variant="dark" expand="lg">
         <Container>
           <Navbar.Brand as={Link} to="/">
             💇‍♂️ Martino Parrucchieri
@@ -40,11 +31,6 @@ function App() {
             <Nav.Link as={Link} to="/">
               Home
             </Nav.Link>
-            {isAdmin && (
-              <Nav.Link as={Link} to="/admin">
-                Dashboard Admin
-              </Nav.Link>
-            )}
 
             {!utente ? (
               <>
@@ -74,17 +60,23 @@ function App() {
             element={<Register setUtente={setUtente} />}
           />
 
-          {/* Dashboard Admin protetta */}
+          {/* Dashboard accessibile solo ad admin 
           <Route
-            path="/admin/*"
-            element={isAdmin ? <Dashboard /> : <Navigate to="/login" replace />}
+            path="/dashboard/*"
+            element={
+              utente?.role === "AMMINISTRATORE" ? (
+                <Dashboard />
+              ) : (
+                <Navigate to="/" replace />
+              )
+            }
           />
-
+*/}
           {/* Fallback 404 */}
           <Route path="*" element={<h2>404 - Pagina non trovata</h2>} />
         </Routes>
       </Container>
-    </Router>
+    </>
   );
 }
 

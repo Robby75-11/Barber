@@ -1,13 +1,17 @@
-import React, { useState } from "react";
-import { Form, Button } from "react-bootstrap";
+import { useState } from "react";
+import { Form, Button, Spinner } from "react-bootstrap";
 import servizioService from "../../services/ServizioService";
 
-function ServizioForm() {
+const ServizioForm = ({ onCreated }) => {
   const [servizio, setServizio] = useState({
     nome: "",
     prezzo: "",
     durata: "",
   });
+  const [loading, setLoading] = useState(false);
+
+  if (!onCreated)
+    throw new Error("ServizioForm richiede un callback onCreated!");
 
   const handleChange = (e) => {
     setServizio({ ...servizio, [e.target.name]: e.target.value });
@@ -15,13 +19,16 @@ function ServizioForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       await servizioService.createServizio(servizio);
-      alert("✅ Servizio creato con successo!");
       setServizio({ nome: "", prezzo: "", durata: "" });
+      onCreated(); // callback per aggiornare la tabella
     } catch (err) {
       console.error(err);
-      alert("❌ Errore nella creazione del servizio");
+      alert("Errore nella creazione del servizio");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -60,9 +67,11 @@ function ServizioForm() {
         />
       </Form.Group>
 
-      <Button type="submit">Crea Servizio</Button>
+      <Button type="submit" disabled={loading} className="w-100 mt-2">
+        {loading ? <Spinner animation="border" size="sm" /> : "Crea Servizio"}
+      </Button>
     </Form>
   );
-}
+};
 
 export default ServizioForm;

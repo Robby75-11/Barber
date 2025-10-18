@@ -1,4 +1,3 @@
-// src/components/PrenotazioniPage.jsx
 import React, { useEffect, useState } from "react";
 import { Form, Button, Spinner } from "react-bootstrap";
 import dayjs from "dayjs";
@@ -28,11 +27,7 @@ const PrenotazioniPage = ({ utente }) => {
     setLoading(true);
     try {
       const res = await prenotazioneService.getAllPrenotazioni();
-      if (isAdmin) {
-        setPrenotazioni(res.data); // admin vede tutte
-      } else {
-        setPrenotazioni(res.data.filter((p) => p.utente.id === utente.id)); // utente vede solo le proprie
-      }
+      setPrenotazioni(res.data);
     } catch (err) {
       console.error(err);
     } finally {
