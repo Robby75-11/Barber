@@ -137,7 +137,7 @@ const PrenotazioniPage = ({ utente }) => {
             <option value="">Seleziona parrucchiere</option>
             {parrucchieri.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.nome}
+                {p.nome} {p.cognome}
               </option>
             ))}
           </Form.Select>
