@@ -28,7 +28,11 @@ const PrenotazioniTable = ({
             {isAdmin && (
               <td>{p.utente ? `${p.utente.nome} ${p.utente.cognome}` : "-"}</td>
             )}
-            <td>{p.parrucchiere ? p.parrucchiere.nome : "-"}</td>
+            <td>
+              {p.parrucchiere
+                ? `${p.parrucchiere.nome} ${p.parrucchiere.cognome}`
+                : "-"}
+            </td>
             <td>{p.servizio ? p.servizio.nome : "-"}</td>
             <td>{p.data ? dayjs(p.data).format("DD/MM/YYYY HH:mm") : "-"}</td>
             <td className="d-flex gap-2 align-items-center">
