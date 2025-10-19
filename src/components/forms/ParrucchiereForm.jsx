@@ -43,7 +43,7 @@ const ParrucchiereForm = ({ onCreated }) => {
           <Form.Label>Cognome</Form.Label>
           <Form.Control
             type="text"
-            value={nome}
+            value={cognome}
             onChange={(e) => setNome(e.target.value)}
             required
           />
