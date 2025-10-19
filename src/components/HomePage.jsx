@@ -15,10 +15,10 @@ const images = [
   "/modelli.jpeg",
   "/modelli2.jpeg",
   "/salone.jpeg",
-  "/saloon.jpeg",
+  "/colore.jpeg",
   "/shampoo.jpeg",
   "/colore3.jpeg",
-  "/sala 2.jpeg",
+  "/bionda.jpeg",
 ];
 
 const HomePage = ({ utente }) => {
