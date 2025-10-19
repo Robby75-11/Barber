@@ -4,6 +4,7 @@ import ParrucchiereService from "../../services/ParrucchiereService";
 
 const ParrucchiereForm = ({ onCreated }) => {
   const [nome, setNome] = useState("");
+  const [cognome, setCognome] = useState("");
   const [specialita, setSpecialita] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -16,6 +17,7 @@ const ParrucchiereForm = ({ onCreated }) => {
     try {
       await ParrucchiereService.createParrucchiere({ nome, specialita });
       setNome("");
+      setCognome("");
       setSpecialita("");
       onCreated(); // callback per aggiornare la tabella
     } catch (err) {

@@ -9,6 +9,7 @@ const ParrucchieriTable = ({ parrucchieri, onDelete }) => {
       <thead>
         <tr>
           <th>Nome</th>
+          <th>Cognome</th>
           <th>Specialità</th>
           <th>Azioni</th>
         </tr>
