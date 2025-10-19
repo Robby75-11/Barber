@@ -17,6 +17,7 @@ const ParrucchieriTable = ({ parrucchieri, onDelete }) => {
         {parrucchieri.map((p) => (
           <tr key={p.id}>
             <td>{p.nome}</td>
+            <td>{p.cognome}</td>
             <td>{p.specialita}</td>
             <td>
               <Button
