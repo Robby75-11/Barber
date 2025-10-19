@@ -1,6 +1,7 @@
 // src/components/ServiziList.jsx
 import { useEffect, useState } from "react";
 import ServizioService from "../services/ServizioService";
+import { Card, Row, Col, Spinner, Alert } from "react-bootstrap";
 
 function ServiziList() {
   const [servizi, setServizi] = useState([]);
@@ -24,13 +25,20 @@ function ServiziList() {
   if (servizi.length === 0) return <p>Nessun servizio trovato.</p>;
 
   return (
-    <ul>
+    <Row>
       {servizi.map((s) => (
-        <li key={s.id}>
-          {s.nome} - €{s.prezzo} ({s.durata} min)
-        </li>
+        <Col key={s.id} xs={12} sm={6} md={4} className="mb-4">
+          <Card className="shadow-sm">
+            <Card.Body>
+              <Card.Title>
+                {s.nome} {s.prezzo}
+              </Card.Title>
+              <Card.Text>durata: {s.durata} min</Card.Text>
+            </Card.Body>
+          </Card>
+        </Col>
       ))}
-    </ul>
+    </Row>
   );
 }
 

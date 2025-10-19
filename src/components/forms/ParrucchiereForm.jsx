@@ -15,7 +15,11 @@ const ParrucchiereForm = ({ onCreated }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await ParrucchiereService.createParrucchiere({ nome, specialita });
+      await ParrucchiereService.createParrucchiere({
+        nome,
+        cognome,
+        specialita,
+      });
       setNome("");
       setCognome("");
       setSpecialita("");
@@ -46,7 +50,7 @@ const ParrucchiereForm = ({ onCreated }) => {
           <Form.Control
             type="text"
             value={cognome}
-            onChange={(e) => setNome(e.target.value)}
+            onChange={(e) => setCognome(e.target.value)}
             required
           />
         </Form.Group>
