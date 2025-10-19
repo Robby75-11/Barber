@@ -39,7 +39,15 @@ const ParrucchiereForm = ({ onCreated }) => {
             required
           />
         </Form.Group>
-
+        <Form.Group className="mb-2">
+          <Form.Label>Cognome</Form.Label>
+          <Form.Control
+            type="text"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            required
+          />
+        </Form.Group>
         <Form.Group className="mb-2">
           <Form.Label>Specialità</Form.Label>
           <Form.Control
